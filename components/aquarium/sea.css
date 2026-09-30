@@ -1,0 +1,12 @@
+/* The aquarium sits behind everything (canvas z-index 0 of its own layer, the page above it) */
+.sea-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.aquarium-canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+}

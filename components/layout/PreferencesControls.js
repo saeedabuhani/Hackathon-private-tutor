@@ -24,7 +24,7 @@ export default function PreferencesControls() {
         role="group"
         aria-label={t.languageLabel}
         dir="ltr" // keep EN | עב | عر in this order even when the page is RTL
-        className="flex gap-1 rounded-lg bg-slate-800 p-1"
+        className="flex gap-1 rounded-full border border-slate-700 bg-slate-900/50 p-1"
       >
         {SITE_LANGUAGES.map((lang) => (
           <button
@@ -32,7 +32,7 @@ export default function PreferencesControls() {
             type="button"
             onClick={() => setSiteLanguage(lang)}
             aria-pressed={siteLanguage === lang}
-            className={`rounded-md px-2.5 py-1 text-xs font-semibold transition ${
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold transition ${
               siteLanguage === lang
                 ? "bg-indigo-600 text-white"
                 : "text-slate-400 hover:text-slate-100"
@@ -48,7 +48,7 @@ export default function PreferencesControls() {
         onClick={() => setTheme(NEXT_THEME[theme] || "dark")}
         title={`${t.themeLabel}: ${themeName}`}
         aria-label={`${t.themeLabel}: ${themeName}`}
-        className="rounded-lg bg-slate-800 px-2.5 py-1.5 text-sm leading-none hover:bg-slate-700"
+        className="rounded-full border border-slate-700 bg-slate-900/50 px-2.5 py-1.5 text-sm leading-none transition hover:border-violet-400/40 hover:shadow-[0_0_7px_rgba(139,92,246,0.16)]"
       >
         {THEME_ICONS[theme] || THEME_ICONS.dark}
       </button>
