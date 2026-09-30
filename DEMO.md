@@ -1,4 +1,4 @@
-# Demo: Private Tutor + StudyFeed (5 minutes)
+# Demo: Leviathan (5 minutes)
 
 ## Prep the night before (do all of it on the production URL)
 
@@ -47,6 +47,10 @@ Click the **StudyFeed** tab. The banner says "Feed updated because you studied a
 Back to Tutor -> the material -> `Test me` (show the professor-style question and the hint that points to a slide but doesn't give the answer) -> `Gap map`, showing the seeded bars.
 > "This project was born from OUR problem. Not another tool that explains: a tool that knows exactly what you don't understand and fixes it."
 
+**Bonus (if time): Career Launch**
+Click the **🚀 Career** tab. Pick a field and level, press *Create my kit* for the LinkedIn headline and About, then *Interview* -> *Ask me a question* -> answer -> see the score and the stronger version. Finish on *Code*: a challenge, a solution, the review and the XP.
+> "Learning is half of it. The same app gets you ready for the first job."
+
 ## Judge questions (short answers)
 
 - **Why not ChatGPT?** It hallucinates. We use RAG at temperature 0.3, so answers come only from the uploaded material, and it says when the info isn't there.
@@ -76,3 +80,4 @@ Back to Tutor -> the material -> `Test me` (show the professor-style question an
 - [ ] Feed: banner on new topic, he/ar/en tabs, error auto-skip, Skip button, Learn deeper returns to the material with the topic filled in.
 - [ ] RTL: Hebrew and Arabic text is right-aligned in answers, exam, hints, cards and sidebar; English terms inside stay readable.
 - [ ] Phone-width window: nothing overflows.
+- [ ] Career: save a profile, job links open in a new tab, LinkedIn kit, interview feedback with a score, a coding challenge gives XP once (solving it again gives none), the summary PDF downloads.
