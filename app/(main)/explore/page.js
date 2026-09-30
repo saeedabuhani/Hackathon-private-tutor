@@ -7,6 +7,7 @@ import { useTranslation } from "@/lib/translations";
 import ExploreVideo from "@/components/explore/ExploreVideo";
 import ExploreQuestion from "@/components/explore/ExploreQuestion";
 import ExploreExplain from "@/components/explore/ExploreExplain";
+import "@/components/feed/video-ui.css";
 import { VIDEO_LAYOUT } from "@/lib/videoFrame";
 
 // 'video' -> 'question' (loading or ready) -> 'wrong' (explanation) -> back to 'video'
@@ -113,6 +114,19 @@ export default function ExplorePage() {
 
   const showPlayer = video && phase !== "loading" && phase !== "empty";
 
+  // design only: when a new video dives into its window, two columns of big bubbles rise beside it
+  useEffect(() => {
+    if (!video) return undefined;
+    const id = setTimeout(() => {
+      const box = document.querySelector(".vstage")?.getBoundingClientRect();
+      if (!box) return;
+      const y = box.bottom - box.height * 0.1;
+      window.dispatchEvent(new CustomEvent("aquarium-bubbles", { detail: { x: box.left - 14, y, count: 9, big: true } }));
+      window.dispatchEvent(new CustomEvent("aquarium-bubbles", { detail: { x: box.right + 14, y, count: 9, big: true } }));
+    }, 250);
+    return () => clearTimeout(id);
+  }, [video?.youtubeId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     console.log("currentVideo", video);
   }, [video]);
@@ -137,11 +151,12 @@ export default function ExplorePage() {
         <div className={VIDEO_LAYOUT}>
           <AnimatePresence mode="wait">
             <motion.div
-              className="min-w-0"
+              className="vstage min-w-0"
               key={video.youtubeId}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, y: -26, scale: 1.1 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.94 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             >
               <ExploreVideo video={video} onTrigger={askQuestion}>
                 {phase === "question" && quiz && (
@@ -167,34 +182,39 @@ export default function ExplorePage() {
             {sessionVideos.length === 0 ? (
               <p className="text-sm text-slate-500">{t.noSessionVideos}</p>
             ) : (
-              <ul className="space-y-2">
-                {sessionVideos.map((v) => (
-                  <li
-                    key={v.youtubeId}
-                    className={`flex gap-3 rounded-2xl p-2.5 ${
-                      v.youtubeId === video.youtubeId
-                        ? "bg-indigo-950 border border-indigo-600"
-                        : "bg-slate-900 border border-slate-800"
-                    }`}
-                  >
-                    {v.thumbnail ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={v.thumbnail} alt="" className="w-24 h-14 rounded-xl object-cover shrink-0" />
-                    ) : (
-                      <div className="w-24 h-14 rounded-xl bg-slate-800 shrink-0" />
-                    )}
-                    <div className="min-w-0">
-                      <p dir="auto" className="text-sm line-clamp-2">
-                        {v.title}
-                      </p>
-                      <p className="text-xs text-slate-500 truncate">
-                        {v.topic}
-                        {v.result === "correct" && " · ✅"}
-                        {v.result === "wrong" && " · ❌"}
-                      </p>
-                    </div>
-                  </li>
-                ))}
+              <ul className="vlist space-y-2">
+                {sessionVideos.map((v, i) => {
+                  const active = v.youtubeId === video.youtubeId;
+                  return (
+                    <li key={v.youtubeId} style={{ "--i": Math.min(i, 8) }}>
+                      <div className={`vcard vcard--window ${active ? "is-active" : ""}`}>
+                        <div className="vthumb">
+                          {v.thumbnail && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={v.thumbnail} alt="" loading="lazy" />
+                          )}
+                          {active && (
+                            <span className="veq" aria-hidden="true">
+                              <i />
+                              <i />
+                              <i />
+                            </span>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p dir="auto" className="text-sm font-medium leading-snug text-slate-100 line-clamp-2">
+                            {v.title}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-slate-500">
+                            {v.topic}
+                            {v.result === "correct" && " · ✅"}
+                            {v.result === "wrong" && " · ❌"}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </aside>

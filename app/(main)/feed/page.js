@@ -182,14 +182,24 @@ export default function FeedPage() {
           <div className="space-y-3 min-w-0">
             {current ? (
               <>
-                <VideoFeed
-                  key={current.id}
-                  video={current}
-                  onEnded={() => markWatched(current, { withQuiz: true })}
-                  onError={() => removeVideo(current, "videoUnplayable")}
-                >
-                  {quizVideo && <QuickQuestion video={quizVideo} onDone={onQuizDone} />}
-                </VideoFeed>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={current.id}
+                    className="vstage"
+                    initial={{ opacity: 0, y: 20, scale: 0.985 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -12, scale: 0.99 }}
+                    transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <VideoFeed
+                      video={current}
+                      onEnded={() => markWatched(current, { withQuiz: true })}
+                      onError={() => removeVideo(current, "videoUnplayable")}
+                    >
+                      {quizVideo && <QuickQuestion video={quizVideo} onDone={onQuizDone} />}
+                    </VideoFeed>
+                  </motion.div>
+                </AnimatePresence>
                 <AnimatePresence mode="wait">
                   <motion.p
                     key={current.id}
@@ -223,6 +233,8 @@ export default function FeedPage() {
               {t.moreAbout} <bdi>{activeTopic}</bdi>
             </h2>
             <VideoSidebar
+              skin="shell"
+              look
               videos={langVideos}
               currentId={current?.id}
               watchedIds={watchedIds}

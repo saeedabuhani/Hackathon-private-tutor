@@ -91,7 +91,7 @@ export default function ExploreVideo({ video, onReady, onTrigger, children }) {
           className="[&_iframe]:w-full [&_iframe]:h-full [&_iframe]:block"
         />
         <div className="absolute inset-x-0 top-0 h-1 bg-white/10">
-          <div className="h-full bg-gradient-to-r from-violet-400 to-blue-400 shadow-[0_0_12px_rgba(139,92,246,0.9)] transition-[width]" style={{ width: `${progress}%` }} />
+          <div className="h-full bg-gradient-to-r from-violet-400 to-blue-400 shadow-[0_0_6px_rgba(139,92,246,0.36)] transition-[width]" style={{ width: `${progress}%` }} />
         </div>
         {children}
       </div>

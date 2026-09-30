@@ -10,7 +10,7 @@ export default function FeedSyncBanner({ topic, onDismiss }) {
     <motion.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between gap-3 rounded-2xl border border-violet-400/40 bg-violet-500/10 px-4 py-2.5 text-sm shadow-[0_0_22px_rgba(139,92,246,0.2)]"
+      className="flex items-center justify-between gap-3 rounded-2xl border border-violet-400/25 bg-violet-500/10 px-4 py-2.5 text-sm shadow-[0_0_11px_rgba(139,92,246,0.08)]"
     >
       <span>
         🔗 {t.feedUpdated} <bdi className="font-bold">{topic}</bdi>

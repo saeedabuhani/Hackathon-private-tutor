@@ -113,7 +113,7 @@ export default function VideoFeed({ video, onEnded, onError, children }) {
             alt=""
             className="absolute inset-0 w-full h-full object-cover opacity-70"
           />
-          <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-2xl text-white shadow-[0_0_34px_rgba(139,92,246,0.85)] transition hover:scale-110">
+          <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-2xl text-white shadow-[0_0_17px_rgba(139,92,246,0.34)] transition hover:scale-105">
             {status === "loading" ? "…" : "▶"}
           </span>
         </button>

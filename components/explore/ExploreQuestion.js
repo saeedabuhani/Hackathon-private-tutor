@@ -33,9 +33,9 @@ export default function ExploreQuestion({ quiz, onAnswer }) {
         {options.map((option, i) => {
           const isCorrectOption = LETTERS[i] === quiz.correct;
           const isPicked = picked === i;
-          let style = "border border-white/10 bg-slate-800 hover:border-violet-400/60 hover:bg-slate-700";
-          if (answered && isCorrectOption) style = "border border-emerald-400/70 bg-emerald-500/20 shadow-[0_0_18px_rgba(16,185,129,0.4)]";
-          else if (answered && isPicked) style = "border border-rose-400/70 bg-rose-500/20 shadow-[0_0_18px_rgba(244,63,94,0.4)]";
+          let style = "border border-white/10 bg-slate-800 hover:border-violet-400/40 hover:bg-slate-700";
+          if (answered && isCorrectOption) style = "border border-emerald-400/70 bg-emerald-500/20 shadow-[0_0_9px_rgba(16,185,129,0.16)]";
+          else if (answered && isPicked) style = "border border-rose-400/70 bg-rose-500/20 shadow-[0_0_9px_rgba(244,63,94,0.16)]";
           return (
             <button
               key={i}

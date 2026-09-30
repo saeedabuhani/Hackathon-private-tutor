@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { loadYouTubeApi } from "@/lib/youtubePlayer";
+import "@/components/feed/video-ui.css";
 import { VIDEO_FRAME, VIDEO_FRAME_STYLE, VIDEO_PLAYER_STYLE } from "@/lib/videoFrame";
 import { useTranslation } from "@/lib/translations";
 
@@ -75,8 +76,12 @@ export default function AiVideoPlayer({ video, onEnded }) {
         />
       )}
 
-      <span className="pointer-events-none absolute start-3 top-3 z-10 rounded-full border border-violet-400/40 bg-[#0b0724]/75 px-3 py-1 text-xs font-medium text-violet-100 shadow-[0_0_16px_rgba(139,92,246,0.4)] backdrop-blur">
-        {t.aiGenerated}
+      <span className="research-label pointer-events-none absolute start-3 top-3 z-10">
+        <i aria-hidden="true" className="research-led" />
+        <span>{t.aiGenerated}</span>
+        <span className="research-id" dir="ltr" aria-hidden="true">
+          SPEC-{String(video.id ?? "").replace(/\W/g, "").slice(-4).toUpperCase().padStart(4, "0")}
+        </span>
       </span>
 
       {failed && (

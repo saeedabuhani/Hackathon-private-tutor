@@ -149,10 +149,11 @@ export default function AiStudiesPage() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-2"
+                initial={{ opacity: 0, y: 20, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -12, scale: 0.99 }}
+                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                className="vstage space-y-2"
               >
                 <AiVideoPlayer video={current} onEnded={handleEnded} />
                 <div dir="auto" className="px-1">
@@ -187,12 +188,20 @@ export default function AiStudiesPage() {
           <aside>
             <h2 className="text-sm text-slate-400 mb-2">{t.videosInList}</h2>
             <VideoSidebar
+              skin="tank"
               videos={sidebarVideos}
               currentId={current.id}
               watchedIds={watchedIds}
               onSelect={(id) => {
                 setXpNote("");
                 setIndex(Math.max(0, visible.findIndex((v) => v.id === id)));
+                // design only: a beam of light lands on the card you opened, like a new find
+                requestAnimationFrame(() => {
+                  const card = document.querySelector(".vcard.is-active");
+                  if (!card) return;
+                  const r = card.getBoundingClientRect();
+                  window.dispatchEvent(new CustomEvent("aquarium-spot", { detail: { rect: { left: r.left, right: r.right, top: r.top, width: r.width, height: r.height } } }));
+                });
               }}
             />
           </aside>
