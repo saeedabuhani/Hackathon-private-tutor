@@ -1,0 +1,330 @@
+/* Video cards (StudyFeed, AI Studies and Explore lists): a quiet glass card that lifts a little,
+   whose thumbnail slowly zooms and shows a play button on hover; the playing one gets a light bar
+   and a tiny equalizer. Only transform / opacity move. */
+
+.vlist > li {
+  animation: v-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.12s + var(--i, 0) * 60ms);
+}
+@keyframes v-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.vcard {
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.55rem;
+  text-align: start;
+  border-radius: 1rem;
+  border: 1px solid rgb(var(--line) / 0.16);
+  background: rgba(10, 16, 36, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s, background 0.3s, box-shadow 0.4s;
+}
+[data-theme="light"] .vcard { background: rgba(255, 255, 255, 0.7); }
+button.vcard { cursor: pointer; }
+.vcard:hover {
+  transform: translateY(-2px);
+  border-color: rgb(var(--line) / 0.42);
+  background: rgba(17, 25, 56, 0.7);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32), 0 0 0 1px rgb(var(--accent-purple) / 0.08);
+}
+[data-theme="light"] .vcard:hover { background: #fff; }
+.vcard:focus-visible {
+  outline: 2px solid rgb(var(--accent-purple) / 0.7);
+  outline-offset: 2px;
+}
+.vcard.is-active {
+  border-color: rgb(var(--accent-purple) / 0.5);
+  background: linear-gradient(135deg, rgba(68, 56, 150, 0.32), rgba(10, 16, 36, 0.6));
+}
+[data-theme="light"] .vcard.is-active { background: linear-gradient(135deg, rgba(139, 124, 246, 0.16), rgba(255, 255, 255, 0.8)); }
+/* the bar on the leading edge of the playing card */
+.vcard.is-active::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, #a99ef8, #6a9cf2);
+}
+
+.vthumb {
+  position: relative;
+  flex: none;
+  width: 6rem;
+  height: 3.5rem;
+  overflow: hidden;
+  border-radius: 0.7rem;
+  background: rgb(var(--slate-800));
+}
+.vthumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s;
+}
+.vcard:hover .vthumb img {
+  transform: scale(1.12);
+  filter: brightness(0.85);
+}
+/* play button, only on hover */
+.vplay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.vplay i {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(10, 16, 36, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transform: scale(0.75);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.vcard:hover .vplay { opacity: 1; }
+.vcard:hover .vplay i { transform: scale(1); }
+.vcard.is-active .vplay { display: none; }
+
+/* tiny "now playing" equalizer */
+.veq {
+  position: absolute;
+  inset-inline-start: 0.35rem;
+  bottom: 0.35rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 0.85rem;
+  padding: 0.18rem 0.3rem;
+  border-radius: 0.4rem;
+  background: rgba(10, 16, 36, 0.72);
+}
+.veq i {
+  display: block;
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: #b9b0ff;
+  transform-origin: bottom;
+  animation: veq 1.2s ease-in-out infinite;
+}
+.veq i:nth-child(2) { animation-duration: 0.9s; animation-delay: -0.3s; }
+.veq i:nth-child(3) { animation-duration: 1.5s; animation-delay: -0.7s; }
+@keyframes veq {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+.vwatched {
+  position: absolute;
+  inset-inline-end: 0.3rem;
+  top: 0.3rem;
+  display: grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  color: #fff;
+  background: rgba(16, 185, 129, 0.85);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .vlist > li,
+  .veq i { animation: none; }
+  .vcard,
+  .vthumb img,
+  .vplay i { transition: none; }
+  .vcard:hover { transform: none; }
+  .vcard:hover .vthumb img { transform: none; }
+}
+
+
+/* ------------------------------------------------------------------ reef: shells and stones */
+/* StudyFeed cards look like wet stones with a pearl edge: a slightly lopsided shape, a grain of
+   noise, a soft highlight on top and a shadow underneath. The playing one gets a pearl sheen. */
+.vcard--shell {
+  border-radius: 1.4rem 1rem 1.45rem 1.05rem / 1.05rem 1.4rem 1rem 1.45rem;
+  border-color: rgba(220, 238, 232, 0.2);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(150deg, rgba(52, 88, 104, 0.74), rgba(18, 44, 58, 0.8));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13), inset 0 -10px 18px rgba(0, 22, 32, 0.32), 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+.vcard--shell:hover {
+  border-color: rgba(240, 250, 244, 0.42);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(150deg, rgba(66, 106, 122, 0.8), rgba(24, 54, 70, 0.85));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -10px 18px rgba(0, 22, 32, 0.3), 0 14px 28px rgba(0, 0, 0, 0.32);
+}
+.vcard--shell.is-active {
+  border-color: rgba(255, 236, 224, 0.5);
+  background:
+    linear-gradient(115deg, rgba(255, 240, 228, 0.16), transparent 42%),
+    linear-gradient(150deg, rgba(84, 118, 130, 0.8), rgba(26, 52, 66, 0.86));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 0 0 1px rgba(255, 226, 205, 0.14), 0 10px 26px rgba(0, 0, 0, 0.3);
+}
+.vcard--shell.is-active::before {
+  background: linear-gradient(to bottom, #ffe9dc, #ffb7c9);
+}
+.vcard--shell .vthumb {
+  border-radius: 0.85rem 0.6rem 0.9rem 0.65rem;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+
+/* ------------------------------------------------------------------ open sea: floating windows */
+/* Explore cards are submarine windows that bob on the current: a steel rim around a glass pane,
+   the thumbnail seen through it. `translate` is used for the float so hover (transform) still works. */
+.vcard--window {
+  border-radius: 1.2rem;
+  border: 5px solid transparent;
+  background:
+    linear-gradient(rgba(6, 14, 46, 0.66), rgba(6, 14, 46, 0.66)) padding-box,
+    linear-gradient(145deg, #a4b4dc 0%, #40507e 24%, #c4d0ee 48%, #364670 74%, #8a9cd0 100%) border-box;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32), inset 0 0 28px rgba(80, 110, 220, 0.14);
+  animation: v-bob 7s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -1.6s);
+}
+[data-theme="light"] .vcard--window {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82)) padding-box,
+    linear-gradient(145deg, #a4b4dc, #6a7ab0 30%, #d0d8f0 50%, #6a7ab0 75%, #98a8dc) border-box;
+}
+.vcard--window:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(rgba(10, 22, 66, 0.72), rgba(10, 22, 66, 0.72)) padding-box,
+    linear-gradient(145deg, #c4d0f0 0%, #5a6a9c 24%, #dbe4fa 48%, #4a5a8c 74%, #a4b4e4 100%) border-box;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.36), inset 0 0 28px rgba(110, 140, 255, 0.2);
+}
+.vcard--window.is-active {
+  border-color: transparent;
+  background:
+    linear-gradient(rgba(20, 34, 92, 0.72), rgba(20, 34, 92, 0.72)) padding-box,
+    linear-gradient(145deg, #dbe4fa 0%, #7a8cc4 24%, #ffffff 48%, #6a7cb4 74%, #c4d0f4 100%) border-box;
+  box-shadow: 0 0 0 1px rgba(170, 190, 255, 0.28), 0 10px 26px rgba(0, 0, 0, 0.3), inset 0 0 30px rgba(120, 150, 255, 0.24);
+}
+.vcard--window.is-active::before { inset-inline-start: -1px; }
+.vcard--window .vthumb {
+  border-radius: 0.7rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 0 0 2px rgba(20, 30, 70, 0.6);
+}
+/* a diagonal glint across the glass */
+.vcard--window .vthumb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.22) 0%, transparent 32%);
+  pointer-events: none;
+}
+@keyframes v-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vcard--window { animation: none; }
+}
+
+
+/* ------------------------------------------------------------------ deep sea: research tanks */
+/* AI Studies cards are glass research tanks: a thin teal frame, a corner bracket, a bluish
+   depth gradient, and a small glow under the thumbnail. The one you opened is "lit" like a find. */
+.vcard--tank {
+  border-radius: 0.75rem;
+  border-color: rgba(120, 220, 230, 0.26);
+  background: linear-gradient(170deg, rgba(8, 62, 76, 0.55), rgba(2, 24, 38, 0.72));
+  box-shadow: inset 0 0 22px rgba(40, 200, 220, 0.06), 0 8px 20px rgba(0, 0, 0, 0.26);
+}
+/* the corner brackets of a specimen tank */
+.vcard--tank::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 0.5rem;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(140, 240, 245, 0.55), rgba(140, 240, 245, 0.55)) top left / 9px 1.5px no-repeat,
+    linear-gradient(rgba(140, 240, 245, 0.55), rgba(140, 240, 245, 0.55)) top left / 1.5px 9px no-repeat,
+    linear-gradient(rgba(140, 240, 245, 0.55), rgba(140, 240, 245, 0.55)) bottom right / 9px 1.5px no-repeat,
+    linear-gradient(rgba(140, 240, 245, 0.55), rgba(140, 240, 245, 0.55)) bottom right / 1.5px 9px no-repeat;
+  opacity: 0.7;
+}
+.vcard--tank:hover {
+  border-color: rgba(150, 240, 245, 0.5);
+  background: linear-gradient(170deg, rgba(10, 80, 96, 0.62), rgba(3, 32, 48, 0.78));
+  box-shadow: inset 0 0 26px rgba(60, 220, 240, 0.12), 0 14px 28px rgba(0, 0, 0, 0.32);
+}
+.vcard--tank .vthumb {
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 1px rgba(140, 240, 245, 0.2), 0 4px 14px rgba(40, 210, 225, 0.12);
+}
+.vcard--tank.is-active {
+  border-color: rgba(170, 250, 250, 0.7);
+  background: linear-gradient(170deg, rgba(14, 104, 118, 0.62), rgba(4, 40, 58, 0.78));
+  box-shadow: inset 0 0 30px rgba(80, 235, 250, 0.2), 0 0 26px rgba(50, 220, 235, 0.22), 0 10px 24px rgba(0, 0, 0, 0.3);
+  animation: tank-lit 6s ease-in-out infinite;
+}
+.vcard--tank.is-active::before { background: linear-gradient(to bottom, #a8fbff, #45d2e0); }
+@keyframes tank-lit {
+  0%, 100% { box-shadow: inset 0 0 30px rgba(80, 235, 250, 0.18), 0 0 20px rgba(50, 220, 235, 0.16), 0 10px 24px rgba(0, 0, 0, 0.3); }
+  50% { box-shadow: inset 0 0 34px rgba(80, 235, 250, 0.26), 0 0 30px rgba(50, 220, 235, 0.28), 0 10px 24px rgba(0, 0, 0, 0.3); }
+}
+
+/* "AI Generated" as a specimen label: a pale card with a status light and a catalogue number */
+.research-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.28rem 0.7rem 0.28rem 0.55rem;
+  border-radius: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #052a34;
+  background: linear-gradient(180deg, #e6fbfd, #b8eef2);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 10px rgba(0, 20, 30, 0.45), 0 0 0 1px rgba(30, 200, 215, 0.35);
+}
+.research-id {
+  padding-inline-start: 0.5rem;
+  border-inline-start: 1px dashed rgba(5, 42, 52, 0.4);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.66rem;
+  font-weight: 500;
+  color: rgba(5, 42, 52, 0.75);
+}
+.research-led {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #17c9a5;
+  box-shadow: 0 0 6px rgba(23, 201, 165, 0.75);
+  animation: comms-led 3.4s ease-in-out infinite;
+}
+@keyframes comms-led {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vcard--tank.is-active,
+  .research-led { animation: none; }
+}

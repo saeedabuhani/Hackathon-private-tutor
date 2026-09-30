@@ -1,0 +1,345 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme colors as "R G B" triplets so Tailwind opacity modifiers keep working.
+   tailwind.config.js maps the slate / indigo / amber / emerald / rose / sky / red shades
+   below to these variables, so every existing class flips with the theme.
+
+   DEFAULT = DARK: a calm, premium "futuristic AI" look meant for long study sessions.
+   Roughly 70% dark glass, 20% soft blue / purple ambient light, 10% accent.
+   Base #050816, glass #0A1024, purple #8B7CF6, blue #5B8DEF, cyan #61D4FF,
+   text #F1F3FA / #9AA4C2. Glows are kept low on purpose. */
+:root {
+  color-scheme: dark;
+
+  --slate-50: 246 248 253;
+  --slate-100: 241 243 250; /* primary text #F1F3FA */
+  --slate-200: 222 227 243;
+  --slate-300: 190 198 224;
+  --slate-400: 154 164 194; /* secondary text #9AA4C2 */
+  --slate-500: 111 121 158;
+  --slate-600: 70 79 124;
+  --slate-700: 42 49 93;
+  --slate-800: 23 29 61;
+  --slate-900: 10 16 36; /* glass base #0A1024 */
+  --slate-950: 5 8 22; /* page #050816 */
+
+  --indigo-200: 216 211 253;
+  --indigo-300: 190 182 252;
+  --indigo-400: 167 157 249;
+  --indigo-500: 139 124 246; /* purple #8B7CF6 */
+  --indigo-600: 118 104 228;
+  --indigo-700: 99 86 205;
+  --indigo-800: 76 66 160;
+  --indigo-900: 50 44 110;
+  --indigo-950: 22 20 56;
+
+  --amber-300: 252 211 77;
+  --amber-400: 244 190 60;
+  --amber-800: 146 64 14;
+  --amber-900: 120 53 15;
+  --amber-950: 69 26 3;
+
+  --emerald-400: 52 211 153;
+  --emerald-800: 6 95 70;
+  --emerald-900: 6 78 59;
+  --emerald-950: 2 44 34;
+
+  --rose-300: 253 164 175;
+  --rose-800: 159 18 57;
+  --rose-900: 136 19 55;
+  --rose-950: 76 5 25;
+
+  --sky-300: 125 211 252;
+  --sky-900: 12 74 110;
+
+  --red-400: 248 113 113;
+
+  --placeholder: 120 130 168;
+  --background: #050816;
+  --foreground: #f1f3fa;
+
+  /* Design tokens used by the rules below */
+  --accent-purple: 139 124 246;
+  --accent-blue: 91 141 239;
+  --accent-cyan: 97 212 255;
+  --line: 139 124 246; /* borders are this color at low opacity */
+  --glass-blur: 16px;
+}
+
+/* LIGHT. The slate scale is re-mapped (page background lightest, cards white, text dark);
+   the tinted colors swap their dark tints for light ones and their pale text for dark text. */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --slate-50: 26 26 46;
+  --slate-100: 26 26 46; /* main text */
+  --slate-200: 46 44 77;
+  --slate-300: 69 68 95;
+  --slate-400: 95 96 120;
+  --slate-500: 107 109 134;
+  --slate-600: 139 141 166;
+  --slate-700: 210 208 232; /* input borders, hover fills */
+  --slate-800: 230 228 246; /* card borders, chips, buttons */
+  --slate-900: 255 255 255; /* cards */
+  --slate-950: 248 247 255; /* page background */
+
+  --indigo-200: 55 48 163;
+  --indigo-300: 67 56 202;
+  --indigo-400: 79 70 229;
+  --indigo-500: 99 102 241;
+  --indigo-600: 79 70 229;
+  --indigo-700: 67 56 202;
+  --indigo-800: 199 210 254;
+  --indigo-900: 224 231 255;
+  --indigo-950: 238 242 255;
+
+  --amber-300: 146 64 14;
+  --amber-400: 180 83 9;
+  --amber-800: 253 230 138;
+  --amber-900: 254 243 199;
+  --amber-950: 255 251 235;
+
+  --emerald-400: 4 120 87;
+  --emerald-800: 167 243 208;
+  --emerald-900: 209 250 229;
+  --emerald-950: 236 253 245;
+
+  --rose-300: 190 18 60;
+  --rose-800: 254 205 211;
+  --rose-900: 255 228 230;
+  --rose-950: 255 241 242;
+
+  --sky-300: 3 105 161;
+  --sky-900: 224 242 254;
+
+  --red-400: 220 38 38;
+
+  --placeholder: 139 141 166;
+  --background: #f8f7ff;
+  --foreground: #1a1a2e;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  /* Heebo covers Hebrew + Latin, Noto Sans Arabic covers Arabic */
+  font-family: var(--font-heebo), var(--font-arabic), system-ui, sans-serif;
+  line-height: 1.55;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgb(var(--placeholder));
+  opacity: 1;
+}
+
+/* Keep code / original terms readable inside RTL text */
+code {
+  unicode-bidi: isolate;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* =====================================================================
+   FUTURISTIC DARK LOOK (design only: colors, glass, soft light, motion).
+   Every rule below is scoped to the dark / auto-dark theme with :where(), which adds no
+   specificity: they override the matching Tailwind utility by coming later in this file,
+   while hover:/focus: variants still win when they should.
+   ===================================================================== */
+
+/* --- Ambient background: very soft violet / blue light behind everything --- */
+:where(html:not([data-theme="light"])) body {
+  background-color: #050816;
+  background-image:
+    radial-gradient(58rem 36rem at 12% -10%, rgb(var(--accent-purple) / 0.12), transparent 62%),
+    radial-gradient(50rem 32rem at 98% 4%, rgb(var(--accent-blue) / 0.1), transparent 62%),
+    radial-gradient(46rem 28rem at 55% 115%, rgb(var(--accent-purple) / 0.07), transparent 62%);
+  background-attachment: fixed;
+}
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(50rem 30rem at 10% -10%, rgb(139 92 246 / 0.08), transparent 60%),
+    radial-gradient(45rem 28rem at 100% 0%, rgb(59 130 246 / 0.06), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* --- Glass cards: every bg-slate-900 surface becomes translucent frosted glass --- */
+:where(html:not([data-theme="light"])) .bg-slate-900 {
+  background-color: rgb(var(--slate-900) / 0.7);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(130%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(130%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 8px 24px rgb(0 0 0 / 0.28);
+}
+:where(html:not([data-theme="light"])) .bg-slate-950\/60,
+:where(html:not([data-theme="light"])) .bg-slate-950\/95 {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+/* Thin, low-opacity violet hairlines */
+:where(html:not([data-theme="light"])) .border-slate-800 {
+  border-color: rgb(var(--line) / 0.16);
+}
+:where(html:not([data-theme="light"])) .border-slate-700 {
+  border-color: rgb(var(--line) / 0.24);
+}
+
+/* --- Highlight: active / hovered violet borders get a barely-there halo --- */
+:where(html:not([data-theme="light"])) .border-indigo-600,
+:where(html:not([data-theme="light"])) .border-indigo-500,
+:where(html:not([data-theme="light"])) .hover\:border-indigo-600:hover {
+  border-color: rgb(var(--accent-purple) / 0.55);
+  box-shadow: 0 0 0 1px rgb(var(--accent-purple) / 0.16), 0 0 12px rgb(var(--accent-purple) / 0.12);
+}
+:where(html:not([data-theme="light"])) .focus\:border-indigo-500:focus {
+  border-color: rgb(var(--accent-purple) / 0.6);
+  box-shadow: 0 0 0 3px rgb(var(--accent-purple) / 0.14);
+}
+:where(html:not([data-theme="light"])) .border-indigo-700,
+:where(html:not([data-theme="light"])) .border-indigo-800 {
+  border-color: rgb(var(--accent-purple) / 0.32);
+}
+
+/* --- Primary buttons: soft violet -> blue gradient, small shadow --- */
+:where(html:not([data-theme="light"])) .bg-indigo-600 {
+  background-image: linear-gradient(135deg, #7d70ee 0%, #6a7cf0 50%, #5b8def 100%);
+  box-shadow: 0 4px 14px rgb(var(--accent-blue) / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.14);
+  transition: filter 0.25s, box-shadow 0.25s, transform 0.2s;
+}
+:where(html:not([data-theme="light"])) .hover\:bg-indigo-500:hover {
+  background-image: linear-gradient(135deg, #8a7ef2 0%, #7688f2 50%, #6b9bf3 100%);
+  box-shadow: 0 6px 18px rgb(var(--accent-blue) / 0.24), inset 0 1px 0 rgb(255 255 255 / 0.18);
+  transform: translateY(-1px);
+}
+:where(html:not([data-theme="light"])) .bg-indigo-600:active {
+  transform: none;
+}
+/* Secondary actions (amber XP button, green "learn deeper") */
+:where(html:not([data-theme="light"])) .bg-amber-600 {
+  background-image: linear-gradient(135deg, #e0a030, #e07f3a);
+  box-shadow: 0 4px 12px rgb(224 160 48 / 0.16);
+}
+:where(html:not([data-theme="light"])) .bg-emerald-700 {
+  background-image: linear-gradient(135deg, #1f9d78, #2a8fa8);
+  box-shadow: 0 4px 12px rgb(31 157 120 / 0.16);
+}
+:where(html:not([data-theme="light"])) .hover\:bg-emerald-600:hover,
+:where(html:not([data-theme="light"])) .hover\:bg-amber-500:hover {
+  filter: brightness(1.1);
+}
+
+/* --- Chips / pills / secondary buttons (bg-slate-800): quiet glass, tiny lift on hover --- */
+:where(html:not([data-theme="light"])) .bg-slate-800 {
+  background-color: rgb(var(--slate-800) / 0.7);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  transition: background-color 0.25s, box-shadow 0.25s;
+}
+:where(html:not([data-theme="light"])) button.bg-slate-800:hover:not(:disabled),
+:where(html:not([data-theme="light"])) a.bg-slate-800:hover {
+  box-shadow: inset 0 0 0 1px rgb(var(--accent-purple) / 0.32);
+}
+
+/* --- Inputs: dark glass field with a soft focus ring --- */
+:where(html:not([data-theme="light"])) input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+:where(html:not([data-theme="light"])) textarea,
+:where(html:not([data-theme="light"])) select {
+  background-color: rgb(var(--slate-950) / 0.55);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+/* --- Scrollbars --- */
+:where(html:not([data-theme="light"])) * {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--accent-purple) / 0.3) transparent;
+}
+:where(html:not([data-theme="light"])) ::selection {
+  background: rgb(var(--accent-purple) / 0.35);
+  color: #fff;
+}
+
+/* --- Reusable pieces --- */
+
+/* Glass panel: the big central surfaces (Tutor, login card, exam card...) */
+.neon-panel,
+.glass-panel {
+  position: relative;
+  border-radius: 1.5rem;
+}
+:where(html:not([data-theme="light"])) .neon-panel,
+:where(html:not([data-theme="light"])) .glass-panel {
+  border: 1px solid rgb(var(--line) / 0.22);
+  box-shadow: 0 20px 56px rgb(0 0 0 / 0.4), 0 0 44px rgb(var(--accent-blue) / 0.05),
+    inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+/* A whisper of sheen along the top edge */
+.neon-panel::before,
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.045), transparent 28%);
+  pointer-events: none;
+  z-index: 1;
+}
+[data-theme="light"] .neon-panel,
+[data-theme="light"] .glass-panel {
+  border: 1px solid rgb(139 92 246 / 0.2);
+}
+
+/* Gradient headline text (soft, low saturation) */
+.text-neon {
+  background: linear-gradient(90deg, #d8d4fb, #b7cdf6 65%, #d6cbf7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme="light"] .text-neon {
+  background: linear-gradient(90deg, #6d28d9, #2563eb);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Page content fades up when a page mounts */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+main > * {
+  /* backwards: no leftover transform, which would trap position:fixed children */
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Slow, gentle breathing for "live" accents (e.g. the thinking dot) */
+@keyframes neon-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgb(var(--accent-purple) / 0.35);
+  }
+  50% {
+    box-shadow: 0 0 9px rgb(var(--accent-purple) / 0.55);
+  }
+}
+.animate-neon {
+  animation: neon-pulse 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main > * {
+    animation: none;
+  }
+  .animate-neon {
+    animation: none;
+  }
+}

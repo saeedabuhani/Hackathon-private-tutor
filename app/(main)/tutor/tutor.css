@@ -1,0 +1,701 @@
+/* The Tutor stage: a large central glass panel, floating lesson cards around it, a calm
+   cinematic background and a floating bottom bar.
+   Everything here is deliberately quiet: low-opacity borders, soft shadows, slow motion.
+   Rough balance: 70% dark glass, 20% ambient blue / purple light, 10% accent. */
+
+/* accent tints, used by cards / icons: --ac is an "R G B" triplet */
+.accent-purple { --ac: 139 124 246; }
+.accent-blue { --ac: 91 141 239; }
+.accent-cyan { --ac: 97 212 255; }
+.accent-green { --ac: 84 200 165; }
+.accent-amber { --ac: 232 184 100; }
+
+/* ------------------------------------------------------------------ stage */
+.tutor-stage {
+  --mx: 0;
+  --my: 0;
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100vh - 3.6rem);
+  padding: 1.25rem 1rem 7.5rem;
+  overflow-x: clip;
+}
+/* a few very faint particles and two barely visible light streaks, drifting slowly */
+.tutor-stage::before {
+  content: "";
+  position: absolute;
+  inset: -3rem 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(1.4px 1.4px at 8% 18%, rgb(190 200 255 / 0.4), transparent),
+    radial-gradient(1px 1px at 17% 63%, rgb(190 200 255 / 0.3), transparent),
+    radial-gradient(1.6px 1.6px at 26% 36%, rgb(170 190 255 / 0.32), transparent),
+    radial-gradient(1px 1px at 34% 82%, rgb(190 200 255 / 0.28), transparent),
+    radial-gradient(1.4px 1.4px at 46% 12%, rgb(190 200 255 / 0.32), transparent),
+    radial-gradient(1px 1px at 58% 70%, rgb(170 190 255 / 0.26), transparent),
+    radial-gradient(1.5px 1.5px at 67% 28%, rgb(200 190 255 / 0.34), transparent),
+    radial-gradient(1px 1px at 76% 88%, rgb(190 200 255 / 0.26), transparent),
+    radial-gradient(1.4px 1.4px at 86% 44%, rgb(190 200 255 / 0.32), transparent),
+    radial-gradient(1px 1px at 93% 16%, rgb(200 190 255 / 0.28), transparent),
+    linear-gradient(115deg, transparent 32%, rgb(120 150 255 / 0.035) 45%, transparent 58%),
+    linear-gradient(115deg, transparent 62%, rgb(150 130 255 / 0.03) 72%, transparent 82%);
+  animation: stage-drift 140s linear infinite alternate;
+}
+/* a soft "floor" glow under the panel, like the platform in the reference */
+.tutor-stage::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -9rem;
+  width: min(1200px, 130%);
+  height: 24rem;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgb(91 141 239 / 0.09), rgb(139 124 246 / 0.05) 45%, transparent 70%);
+}
+@keyframes stage-drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-2.5rem); }
+}
+
+.tutor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  max-width: 1560px;
+  margin-inline: auto;
+  align-items: start;
+}
+@media (min-width: 1280px) {
+  .tutor-grid {
+    grid-template-columns: 250px minmax(0, 800px) 250px;
+    justify-content: center;
+    gap: 2.75rem;
+  }
+}
+
+/* ------------------------------------------------------------------ rails */
+.rail { display: none; --tilt: 1; }
+.rail-end { --tilt: -1; }
+[dir="rtl"] .rail-start { --tilt: -1; }
+[dir="rtl"] .rail-end { --tilt: 1; }
+@media (min-width: 1280px) {
+  .rail {
+    display: block;
+    position: sticky;
+    top: 4.9rem;
+    max-height: calc(100vh - 11rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0.5rem 0.25rem 2rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 1rem, #000 calc(100% - 2.2rem), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 1rem, #000 calc(100% - 2.2rem), transparent 100%);
+  }
+  .rail::-webkit-scrollbar { display: none; }
+}
+
+.rail-title {
+  margin: 0 0 0.75rem;
+  padding-inline: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(var(--slate-400));
+}
+.rail-note {
+  padding: 0.5rem 0.4rem;
+  font-size: 0.82rem;
+  color: rgb(var(--slate-500));
+}
+
+/* one floating card: tilted toward the centre, smaller / softer the further down the list */
+.rail-card {
+  --rot: 14deg;
+  --scale: 1;
+  --depth: 5;
+  margin-bottom: 0.85rem;
+  transform: perspective(1100px) rotateY(calc(var(--tilt) * var(--rot))) scale(var(--scale))
+    translate3d(calc(var(--mx) * var(--depth) * -1px), calc(var(--my) * var(--depth) * -1px), 0);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s, filter 0.4s;
+  will-change: transform;
+}
+.rail-list > .rail-card:nth-child(2) { --scale: 0.985; }
+.rail-list > .rail-card:nth-child(3) { --scale: 0.97; --depth: 7; opacity: 0.96; }
+.rail-list > .rail-card:nth-child(4) { --scale: 0.955; --depth: 8; opacity: 0.88; filter: blur(0.3px); }
+.rail-list > .rail-card:nth-child(5) { --scale: 0.94; --depth: 9; opacity: 0.8; filter: blur(0.6px); }
+.rail-list > .rail-card:nth-child(n + 6) { --scale: 0.925; --depth: 10; opacity: 0.68; filter: blur(1px); }
+.rail-card:hover,
+.rail-card:focus-within {
+  --rot: 3deg;
+  --scale: 1.02;
+  opacity: 1 !important;
+  filter: none !important;
+  z-index: 3;
+}
+
+.lesson-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgb(var(--line) / 0.16);
+  background: linear-gradient(160deg, rgba(20, 27, 58, 0.7), rgba(10, 16, 36, 0.66));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  /* slow float; `translate` is separate from `transform`, so it doesn't fight the tilt */
+  animation: float-soft 11s ease-in-out infinite;
+}
+.rail-list > .rail-card:nth-child(2n) .lesson-card { animation-duration: 13s; animation-delay: -3s; }
+.rail-list > .rail-card:nth-child(3n) .lesson-card { animation-duration: 15s; animation-delay: -6s; }
+@keyframes float-soft {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -4px; }
+}
+.lesson-card:hover {
+  border-color: rgb(var(--line) / 0.38);
+  background: linear-gradient(160deg, rgba(26, 34, 72, 0.78), rgba(12, 19, 42, 0.72));
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.lesson-card.is-active {
+  border-color: rgb(var(--line) / 0.5);
+  background: linear-gradient(160deg, rgba(34, 40, 86, 0.8), rgba(14, 20, 46, 0.74));
+}
+.lesson-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.8rem;
+  font-size: 1.05rem;
+  color: rgb(var(--ac));
+  background: rgb(var(--ac) / 0.14);
+  border: 1px solid rgb(var(--ac) / 0.22);
+}
+.lesson-title {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgb(var(--slate-100));
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  padding-inline-end: 1.2rem;
+}
+.lesson-sub {
+  margin: 0.15rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: rgb(var(--slate-400));
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lesson-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  color: rgb(var(--slate-500));
+}
+.lesson-tag {
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  color: rgb(var(--ac));
+  background: rgb(var(--ac) / 0.12);
+  border: 1px solid rgb(var(--ac) / 0.2);
+}
+.lesson-menu-btn {
+  position: absolute;
+  inset-inline-end: 0.4rem;
+  top: 0.4rem;
+  padding: 0 0.45rem;
+  border-radius: 0.5rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: rgb(var(--slate-400));
+  transition: opacity 0.2s, background 0.2s;
+}
+.lesson-menu-btn:hover { background: rgba(255, 255, 255, 0.08); color: rgb(var(--slate-100)); }
+
+/* Below the wide layout the side cards become one horizontal, swipeable strip */
+.rail-carousel {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.15rem 0.75rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.rail-carousel::-webkit-scrollbar { display: none; }
+.rail-carousel > div,
+.rail-carousel .rail-list { display: contents; }
+.rail-carousel .rail-title { display: none; }
+.rail-carousel .rail-card {
+  flex: 0 0 15.5rem;
+  margin: 0;
+  transform: none;
+  scroll-snap-align: start;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.rail-carousel .rail-note { flex: 0 0 auto; align-self: center; }
+@media (min-width: 1280px) {
+  .rail-carousel { display: none; }
+}
+
+/* ------------------------------------------------------------ central panel */
+.tutor-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: clamp(30rem, calc(100dvh - 12.75rem), 56rem);
+}
+:where(html:not([data-theme="light"])) .tutor-panel {
+  background: linear-gradient(180deg, rgba(14, 20, 44, 0.74), rgba(8, 12, 28, 0.8));
+  -webkit-backdrop-filter: blur(22px) saturate(130%);
+  backdrop-filter: blur(22px) saturate(130%);
+}
+[data-theme="light"] .tutor-panel { background: rgba(255, 255, 255, 0.82); }
+
+.tutor-panel-header {
+  position: relative;
+  z-index: 3;
+  padding: 1rem 1.25rem 0.85rem;
+  border-bottom: 1px solid rgb(var(--line) / 0.14);
+}
+.tutor-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.95rem;
+  color: #e9e6ff;
+  background: linear-gradient(135deg, rgba(125, 112, 238, 0.55), rgba(91, 141, 239, 0.45));
+  border: 1px solid rgba(180, 170, 255, 0.28);
+  box-shadow: 0 4px 14px rgba(91, 141, 239, 0.16);
+}
+.course-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: rgb(var(--slate-200));
+  background: rgb(var(--accent-purple) / 0.1);
+  border: 1px solid rgb(var(--accent-purple) / 0.2);
+}
+
+.tutor-messages {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.1rem 1.25rem 1rem;
+}
+.chat-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.chat-avatar.ai {
+  color: #d5d0ff;
+  background: linear-gradient(135deg, rgba(125, 112, 238, 0.3), rgba(91, 141, 239, 0.22));
+  border: 1px solid rgba(160, 150, 255, 0.25);
+}
+.chat-avatar.user {
+  color: rgb(var(--slate-200));
+  background: rgb(var(--slate-700) / 0.8);
+  border: 1px solid rgb(var(--line) / 0.2);
+}
+.ai-bubble {
+  padding: 0.9rem 1.1rem;
+  border-radius: 1.1rem;
+  border-start-start-radius: 0.4rem;
+  border: 1px solid rgb(var(--line) / 0.16);
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.user-bubble {
+  max-width: 80%;
+  padding: 0.7rem 1.05rem;
+  border-radius: 1.1rem;
+  border-end-end-radius: 0.4rem;
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(125, 112, 238, 0.9), rgba(91, 141, 239, 0.85));
+  box-shadow: 0 4px 14px rgba(91, 141, 239, 0.16);
+}
+
+/* typing indicator: three soft dots */
+.typing { display: inline-flex; gap: 0.3rem; align-items: center; }
+.typing i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: rgb(var(--accent-purple));
+  opacity: 0.35;
+  animation: typing-soft 1.5s ease-in-out infinite;
+}
+.typing i:nth-child(2) { animation-delay: 0.2s; }
+.typing i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-soft {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 0.9; transform: translateY(-2px); }
+}
+
+/* four quick actions under an AI answer */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+}
+.quick-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(var(--ac) / 0.2);
+  background: linear-gradient(135deg, rgb(var(--ac) / 0.09), rgba(10, 16, 36, 0.5));
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s, background 0.3s;
+}
+.quick-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgb(var(--ac) / 0.4);
+  background: linear-gradient(135deg, rgb(var(--ac) / 0.15), rgba(10, 16, 36, 0.55));
+}
+.quick-card:disabled { opacity: 0.5; }
+.quick-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.8rem;
+  color: rgb(var(--ac));
+  background: rgb(var(--ac) / 0.15);
+}
+
+/* ------------------------------------------------------------------ input bar */
+.tutor-composer {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid rgb(var(--line) / 0.14);
+}
+.composer-box {
+  padding: 0.55rem 0.6rem 0.5rem 0.9rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgb(var(--line) / 0.26);
+  background: rgba(5, 8, 22, 0.55);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+[dir="rtl"] .composer-box { padding: 0.55rem 0.9rem 0.5rem 0.6rem; }
+.composer-box:focus-within {
+  border-color: rgb(var(--accent-purple) / 0.55);
+  box-shadow: 0 0 0 3px rgb(var(--accent-purple) / 0.12);
+}
+.composer-input {
+  display: block;
+  width: 100%;
+  max-height: 9rem;
+  resize: none;
+  padding: 0.25rem 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: inherit;
+}
+.composer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+.composer-tool {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.7rem;
+  color: rgb(var(--slate-400));
+  transition: background 0.2s, color 0.2s;
+}
+.composer-tool:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); color: rgb(var(--slate-100)); }
+.composer-tool.is-on { background: rgb(var(--accent-purple) / 0.16); color: rgb(var(--indigo-300)); }
+.composer-tool:disabled { opacity: 0.45; }
+.model-chip {
+  display: none;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: rgb(var(--indigo-300));
+  background: rgb(var(--accent-purple) / 0.08);
+  border: 1px solid rgb(var(--line) / 0.22);
+}
+@media (min-width: 480px) { .model-chip { display: inline-flex; } }
+.send-btn {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.9rem;
+  color: #fff;
+  background: linear-gradient(135deg, #7d70ee, #5b8def);
+  box-shadow: 0 4px 14px rgba(91, 141, 239, 0.22);
+  transition: transform 0.2s, filter 0.2s, opacity 0.2s;
+}
+.send-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ------------------------------------------------------------------ code blocks */
+.code-block {
+  margin: 0.85rem 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgb(var(--line) / 0.2);
+  background: rgba(5, 8, 22, 0.72);
+}
+.code-block-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.75rem;
+  border-bottom: 1px solid rgb(var(--line) / 0.14);
+  background: rgba(255, 255, 255, 0.03);
+}
+.code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgb(var(--line) / 0.2);
+  font-size: 0.74rem;
+  color: rgb(var(--slate-300));
+  transition: background 0.2s, color 0.2s;
+}
+.code-copy:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+
+/* ------------------------------------------------------------------ floating bottom bar */
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0.9rem;
+  transform: translateX(-50%);
+  z-index: 35;
+  display: flex;
+  gap: 0.2rem;
+  padding: 0.35rem;
+  border-radius: 1.4rem;
+  border: 1px solid rgb(var(--line) / 0.22);
+  background: rgba(10, 16, 36, 0.72);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+[data-theme="light"] .bottom-nav { background: rgba(255, 255, 255, 0.85); }
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 3.9rem;
+  padding: 0.45rem 0.6rem 0.4rem;
+  border-radius: 1.05rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgb(var(--slate-400));
+  transition: background 0.25s, color 0.25s;
+}
+.bottom-nav-item:hover { background: rgba(255, 255, 255, 0.06); color: rgb(var(--slate-100)); }
+.bottom-nav-item.is-active {
+  color: rgb(var(--indigo-200));
+  background: rgb(var(--accent-purple) / 0.16);
+  box-shadow: inset 0 0 0 1px rgb(var(--accent-purple) / 0.26);
+}
+@media (min-width: 640px) {
+  .bottom-nav { padding: 0.4rem; gap: 0.3rem; }
+  .bottom-nav-item { min-width: 4.6rem; font-size: 0.75rem; }
+}
+
+/* ------------------------------------------------------------------ calm for everyone */
+/* touch screens and "reduce motion": no float, no parallax, no particles drifting */
+@media (prefers-reduced-motion: reduce) {
+  .lesson-card, .tutor-stage::before { animation: none; }
+  .rail-card, .quick-card, .send-btn { transition: none; }
+}
+@media (hover: none) {
+  .rail-card { transform: none; }
+}
+
+
+/* ------------------------------------------------------------------ entrance + soft lighting */
+/* The Tutor panel rises into place; the side cards arrive one after another. The cards use the
+   separate `translate` property, so this never fights the tilt (which is a `transform`). */
+.tutor-panel {
+  animation: tutor-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s backwards;
+}
+@keyframes tutor-enter {
+  from { opacity: 0; transform: translateY(26px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.rail-card {
+  animation: card-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.18s + var(--n, 0) * 75ms);
+}
+.rail-list > .rail-card:nth-child(1) { --n: 0; }
+.rail-list > .rail-card:nth-child(2) { --n: 1; }
+.rail-list > .rail-card:nth-child(3) { --n: 2; }
+.rail-list > .rail-card:nth-child(4) { --n: 3; }
+.rail-list > .rail-card:nth-child(5) { --n: 4; }
+.rail-list > .rail-card:nth-child(6) { --n: 5; }
+.rail-list > .rail-card:nth-child(7) { --n: 6; }
+.rail-list > .rail-card:nth-child(n + 8) { --n: 7; }
+@keyframes card-in {
+  from { opacity: 0; translate: 0 22px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+/* a soft light under the pointer on cards: a gentle spot in the card's own accent colour */
+.lesson-card::before,
+.quick-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(170px circle at var(--px, 50%) var(--py, 0%), rgb(var(--ac, 139 124 246) / 0.14), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.45s;
+  pointer-events: none;
+}
+.lesson-card:hover::before,
+.quick-card:hover::before {
+  opacity: 1;
+}
+.quick-card { position: relative; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tutor-panel,
+  .rail-card { animation: none; }
+}
+
+/* ------------------------------------------------------------------ submarine lab */
+/* Inside the Tutor everything gets blue borders (the panels are portholes, the composer is the
+   communication terminal). Setting the variables here re-tints every border and focus ring below. */
+.tutor-stage {
+  --line: 100 170 235;
+  --accent-purple: 90 180 235;
+  --accent-blue: 70 150 235;
+}
+.tutor-panel {
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.42), inset 0 0 46px rgba(30, 120, 190, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+/* four small screws in the corners of the window */
+.tutor-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 4;
+  background:
+    radial-gradient(circle at 9px 9px, rgba(190, 225, 245, 0.42) 0 1.8px, transparent 2.4px),
+    radial-gradient(circle at calc(100% - 9px) 9px, rgba(190, 225, 245, 0.42) 0 1.8px, transparent 2.4px),
+    radial-gradient(circle at 9px calc(100% - 9px), rgba(190, 225, 245, 0.42) 0 1.8px, transparent 2.4px),
+    radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), rgba(190, 225, 245, 0.42) 0 1.8px, transparent 2.4px);
+}
+/* the message box: a communication terminal with a faint scan texture and a status light */
+.tutor-composer {
+  background:
+    repeating-linear-gradient(to bottom, rgba(120, 200, 255, 0.028) 0 1px, transparent 1px 3px),
+    rgba(0, 10, 24, 0.32);
+}
+.composer-box {
+  position: relative;
+  border-color: rgb(90 200 225 / 0.3);
+  box-shadow: inset 0 0 22px rgba(20, 110, 150, 0.1);
+}
+.composer-input {
+  padding-inline-end: 1.4rem;
+}
+.composer-box::before {
+  content: "";
+  position: absolute;
+  top: 0.7rem;
+  inset-inline-end: 0.8rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4fe3c4;
+  box-shadow: 0 0 6px rgba(79, 227, 196, 0.55);
+  animation: comms-led 3.6s ease-in-out infinite;
+}
+@keyframes comms-led {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .composer-box::before { animation: none; }
+}
+
+/* small bubbles rising out of the message box when the AI answers */
+.tutor-composer { position: relative; }
+.answer-bubbles {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.answer-bubbles i {
+  position: absolute;
+  top: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(190, 235, 255, 0.7);
+  background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.55), rgba(150, 215, 255, 0.08) 60%);
+  opacity: 0;
+  animation: bubble-up 2s ease-out forwards;
+}
+@keyframes bubble-up {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  15% { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(var(--drift, 0), calc(var(--rise, 180px) * -1)) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .answer-bubbles { display: none; }
+}

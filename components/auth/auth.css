@@ -1,0 +1,591 @@
+/* Login / Register: the 3D constellation scene, and a floating glass card with a spinning
+   light ring. All motion is transform / opacity (the ring turns with `rotate`); everything
+   settles under prefers-reduced-motion. This screen is short-lived on purpose, so it can be
+   bolder than the study pages, which stay calm. */
+
+.auth-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  animation: auth-scene-in 1.6s ease-out backwards;
+}
+.auth-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.auth-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 70% at 50% 46%, transparent 38%, rgba(3, 5, 15, 0.6) 100%);
+}
+[data-theme="light"] .auth-vignette {
+  background: radial-gradient(ellipse 80% 70% at 50% 46%, transparent 40%, rgba(248, 247, 255, 0.7) 100%);
+}
+@keyframes auth-scene-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.auth-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  padding: 4.5rem 1rem 2.5rem;
+}
+.auth-top {
+  position: absolute;
+  top: 1rem;
+  inset-inline-end: 1rem;
+  z-index: 5;
+}
+
+/* --------------------------------------------------------------- card stack */
+/* enter (transform, once) > float (translate, forever) > tilt (mouse-driven transform) */
+.auth-enter {
+  width: 100%;
+  max-width: 26rem;
+  animation: auth-enter 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+  --ring-a: #8b7cf6;
+  --ring-b: #61d4ff;
+  --ring-c: #f0abfc;
+  --ring-speed: 7s;
+  --glow: 0.3;
+}
+@keyframes auth-enter {
+  from { opacity: 0; transform: translateY(46px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+.auth-float {
+  animation: auth-float 9s ease-in-out infinite;
+  animation-delay: -2s;
+}
+@keyframes auth-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -9px; }
+}
+.auth-tilt {
+  --rx: 0deg;
+  --ry: 0deg;
+  --sx: 50%;
+  --sy: 20%;
+  transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry));
+  /* no preserve-3d here: it would switch off the glass blur behind the card */
+}
+
+.auth-shell {
+  position: relative;
+  display: block;
+  border-radius: 1.75rem;
+  isolation: isolate;
+}
+.auth-glass {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  border-radius: inherit;
+  background: linear-gradient(160deg, rgba(22, 28, 66, 0.66), rgba(8, 12, 30, 0.76));
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.55), 0 0 90px rgba(110, 100, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+[data-theme="light"] .auth-glass {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.78), rgba(244, 241, 255, 0.72));
+  box-shadow: 0 30px 80px rgba(80, 60, 180, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+/* light that follows the mouse across the glass */
+.auth-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(420px circle at var(--sx) var(--sy), rgba(190, 180, 255, 0.16), transparent 62%);
+  pointer-events: none;
+}
+
+/* the ring: a conic light that turns behind a masked border */
+.auth-ring {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1.5px;
+  overflow: hidden;
+  background: rgba(139, 124, 246, 0.22);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+.auth-ring::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(from 0deg, transparent 0 46%, var(--ring-a) 62%, var(--ring-b) 76%, var(--ring-c) 88%, transparent 100%);
+  animation: auth-rotate var(--ring-speed) linear infinite;
+}
+/* the same ring, blurred, for the glow around the card */
+.auth-glow {
+  position: absolute;
+  inset: -3px;
+  z-index: -2;
+  border-radius: inherit;
+  overflow: hidden;
+  filter: blur(18px);
+  opacity: var(--glow);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.auth-glow::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(from 0deg, transparent 0 46%, var(--ring-a) 62%, var(--ring-b) 76%, var(--ring-c) 88%, transparent 100%);
+  animation: auth-rotate var(--ring-speed) linear infinite;
+}
+@keyframes auth-rotate {
+  to { rotate: 360deg; }
+}
+
+.auth-content {
+  position: relative;
+  padding: 2.1rem 1.9rem 1.8rem;
+}
+@media (max-width: 480px) {
+  .auth-content { padding: 1.7rem 1.35rem 1.5rem; }
+}
+
+/* children rise in one after another */
+.auth-content > .rise {
+  animation: auth-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.45s + var(--i, 0) * 80ms);
+}
+@keyframes auth-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ------------------------------------------------------------------ brand + title */
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+.auth-mark {
+  width: 3.75rem;
+  height: 3.75rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+.auth-mark .lev-mark {
+  filter: drop-shadow(0 0 12px rgb(var(--accent-cyan) / 0.45));
+}
+.auth-word {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+}
+.auth-tag {
+  font-size: 0.78rem;
+  color: rgb(var(--slate-400));
+}
+.auth-title {
+  margin: 0 0 0.35rem;
+  font-size: 2rem;
+  line-height: 1.15;
+  font-weight: 800;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.3em;
+}
+.auth-title .word {
+  display: inline-block;
+  animation: auth-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(0.55s + var(--w, 0) * 110ms);
+}
+
+/* ------------------------------------------------------------------ fields */
+.auth-field {
+  position: relative;
+  display: block;
+}
+.auth-field svg {
+  position: absolute;
+  inset-inline-start: 1rem;
+  top: 50%;
+  translate: 0 -50%;
+  color: rgb(var(--slate-400));
+  transition: color 0.25s;
+  pointer-events: none;
+}
+.auth-field:focus-within svg {
+  color: rgb(var(--indigo-300));
+}
+.auth-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  padding-inline-start: 2.85rem;
+  border-radius: 0.95rem;
+  border: 1px solid rgb(var(--line) / 0.28);
+  background: rgba(5, 8, 22, 0.58);
+  color: inherit;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+[data-theme="light"] .auth-input {
+  background: rgba(255, 255, 255, 0.75);
+}
+.auth-input::placeholder {
+  color: rgb(var(--slate-500));
+}
+.auth-input:hover {
+  border-color: rgb(var(--line) / 0.45);
+}
+.auth-input:focus {
+  border-color: rgb(var(--accent-purple) / 0.8);
+  box-shadow: 0 0 0 4px rgb(var(--accent-purple) / 0.16);
+  background: rgba(8, 12, 32, 0.7);
+}
+[data-theme="light"] .auth-input:focus {
+  background: #fff;
+}
+.auth-input:-webkit-autofill {
+  -webkit-text-fill-color: rgb(var(--slate-100));
+  box-shadow: 0 0 0 40px #0b1128 inset;
+  caret-color: #fff;
+}
+
+.auth-msg {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.8rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  animation: auth-msg-in 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.auth-msg.err {
+  color: #fecdd3;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.32);
+}
+.auth-msg.ok {
+  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+[data-theme="light"] .auth-msg.err { color: #9f1239; }
+[data-theme="light"] .auth-msg.ok { color: #065f46; }
+@keyframes auth-msg-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ------------------------------------------------------------------ button */
+.auth-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 3.1rem;
+  overflow: hidden;
+  border-radius: 0.95rem;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  background: linear-gradient(120deg, #7d70ee 0%, #5b8def 62%, #4fb6ec 100%);
+  box-shadow: 0 12px 32px rgba(91, 141, 239, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s, box-shadow 0.25s;
+}
+.auth-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 16px 38px rgba(91, 141, 239, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.auth-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.auth-btn:disabled {
+  cursor: default;
+}
+/* a slow sheen crossing the button */
+.auth-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  translate: -140% 0;
+  animation: auth-sheen 5.5s ease-in-out 1.6s infinite;
+}
+[dir="rtl"] .auth-btn::after {
+  animation-name: auth-sheen-rtl;
+}
+@keyframes auth-sheen {
+  0%, 62% { translate: -140% 0; }
+  100% { translate: 320% 0; }
+}
+@keyframes auth-sheen-rtl {
+  0%, 62% { translate: 140% 0; }
+  100% { translate: -320% 0; }
+}
+.auth-btn > span {
+  grid-area: 1 / 1;
+  transition: opacity 0.25s, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.auth-btn .label { opacity: 1; }
+.auth-btn .spin,
+.auth-btn .done { opacity: 0; transform: scale(0.6); }
+.auth-btn.is-loading .label { opacity: 0; transform: translateY(-8px); }
+.auth-btn.is-loading .spin { opacity: 1; transform: none; }
+.auth-btn.is-done .label,
+.auth-btn.is-done .spin { opacity: 0; }
+.auth-btn.is-done .done { opacity: 1; transform: none; }
+.auth-spin-ring {
+  display: block;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 999px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  animation: auth-spin 0.8s linear infinite;
+}
+@keyframes auth-spin {
+  to { rotate: 360deg; }
+}
+
+.auth-switch {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgb(var(--slate-400));
+  text-align: center;
+}
+.auth-switch a {
+  color: rgb(var(--indigo-300));
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+/* the three areas of the app, under the card */
+.auth-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  animation: auth-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.1s backwards;
+}
+.auth-chip {
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: rgb(var(--slate-300));
+  background: rgba(10, 16, 36, 0.5);
+  border: 1px solid rgb(var(--line) / 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+[data-theme="light"] .auth-chip {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ------------------------------------------------------------------ states */
+/* waiting for the server: the ring speeds up and the glow deepens */
+.auth-enter.is-charging {
+  --ring-speed: 1.5s;
+  --glow: 0.62;
+}
+/* wrong password / network error: a shake and a red ring */
+.auth-enter.is-error {
+  --ring-a: #fb7185;
+  --ring-b: #f43f5e;
+  --ring-c: #fda4af;
+  --ring-speed: 2.4s;
+  --glow: 0.55;
+}
+.auth-enter.is-error > .auth-state {
+  animation: auth-shake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes auth-shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(5px); }
+  30%, 50%, 70% { transform: translateX(-9px); }
+  40%, 60% { transform: translateX(9px); }
+}
+/* success: the card is pulled into the warp */
+.auth-enter.is-launch {
+  --ring-speed: 0.9s;
+  --glow: 0.9;
+}
+.auth-enter.is-launch > .auth-state {
+  animation: auth-launch 0.95s cubic-bezier(0.55, 0, 0.7, 0.2) forwards;
+}
+@keyframes auth-launch {
+  0% { opacity: 1; transform: scale(1); }
+  30% { opacity: 1; transform: scale(1.035); }
+  100% { opacity: 0; transform: scale(0.45) translateY(-30px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-scene,
+  .auth-enter,
+  .auth-float,
+  .auth-content > .rise,
+  .auth-title .word,
+  .auth-chips,
+  .auth-ring::before,
+  .auth-glow::before,
+  .auth-btn::after {
+    animation: none !important;
+  }
+  .auth-enter.is-launch > .auth-state { opacity: 0; animation: none; }
+  .auth-tilt { transform: none !important; }
+}
+@media (hover: none) {
+  .auth-tilt { transform: none !important; }
+}
+
+
+/* =====================================================================
+   THE SEA VERSION: the card is a submarine window. A steel frame with rivets, thick glass with a
+   diagonal reflection, teal light. These rules come last on purpose.
+   ===================================================================== */
+.auth-sea {
+  --accent-purple: 70 200 225;
+  --line: 120 205 232;
+}
+.auth-sea .text-neon {
+  background: linear-gradient(90deg, #e2fcff, #8be4f4 55%, #cbf4ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.auth-sea .auth-enter {
+  --ring-a: #2fd0e0;
+  --ring-b: #3aa0f0;
+  --ring-c: #7ff0e6;
+  --glow: 0.28;
+}
+.auth-sea .auth-enter.is-error {
+  --ring-a: #fb7185;
+  --ring-b: #f43f5e;
+  --ring-c: #fda4af;
+}
+.auth-sea .auth-enter.is-charging { --glow: 0.55; }
+.auth-sea .auth-enter.is-launch { --glow: 0.9; }
+
+.auth-sea .auth-glass {
+  background: linear-gradient(160deg, rgba(10, 64, 86, 0.58), rgba(2, 20, 36, 0.78));
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.55), 0 0 90px rgba(30, 170, 210, 0.16), inset 0 0 60px rgba(0, 190, 230, 0.1);
+}
+[data-theme="light"] .auth-sea .auth-glass {
+  background: linear-gradient(160deg, rgba(230, 250, 255, 0.72), rgba(190, 232, 245, 0.62));
+}
+/* a diagonal streak of light across the glass, like a real window */
+.auth-sea .auth-glass::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: calc(1.75rem - 9px);
+  background: linear-gradient(118deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.045) 21%, transparent 22%),
+    radial-gradient(120% 60% at 18% 0%, rgba(180, 240, 255, 0.09), transparent 60%);
+  pointer-events: none;
+}
+
+/* the steel frame */
+.auth-sea .auth-ring {
+  padding: 9px;
+  background: linear-gradient(145deg, #8db3c1 0%, #33596a 22%, #b4d2dc 46%, #2a4d5f 72%, #79a1b1 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+.auth-sea .auth-enter.is-error .auth-ring {
+  background: linear-gradient(145deg, #ffb0ba, #7a2030 30%, #ffc0c8 50%, #7a2030 75%, #ff8a98);
+}
+.auth-sea .auth-ring::before {
+  left: 0;
+  top: 0;
+  width: 42%;
+  height: 100%;
+  aspect-ratio: auto;
+  translate: -150% 0;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  animation: auth-frame-sheen 8s ease-in-out 1.2s infinite;
+}
+@keyframes auth-frame-sheen {
+  0%, 60% { translate: -150% 0; }
+  100% { translate: 340% 0; }
+}
+.auth-rivets {
+  display: none;
+}
+.auth-sea .auth-rivets {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.auth-rivets i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #eef9fc, #6b93a3 55%, #2a4a5a);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+
+.auth-sea .auth-btn {
+  background: linear-gradient(120deg, #14aabb 0%, #2a8fd8 58%, #3d6fe0 100%);
+  box-shadow: 0 12px 32px rgba(30, 160, 210, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.auth-sea .auth-btn:hover:not(:disabled) {
+  box-shadow: 0 16px 38px rgba(30, 170, 220, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.auth-sea .auth-field:focus-within svg,
+.auth-sea .auth-switch a {
+  color: #8fe8f5;
+}
+.auth-vignette {
+  background: radial-gradient(ellipse 85% 75% at 50% 48%, transparent 45%, rgba(0, 8, 18, 0.5) 100%);
+}
+
+/* light theme of the sea card: the water is pale, so the title, brand and links go dark teal
+   (light-on-light text was unreadable) */
+[data-theme="light"] .auth-sea .text-neon {
+  background: linear-gradient(90deg, #04324a, #0a6684 60%, #0b4f8a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme="light"] .auth-sea .auth-switch a,
+[data-theme="light"] .auth-sea .auth-field:focus-within svg {
+  color: #06587a;
+}
+[data-theme="light"] .auth-sea .auth-tag,
+[data-theme="light"] .auth-sea .auth-switch {
+  color: #24506a;
+}
+[data-theme="light"] .auth-sea .lev-wave {
+  stroke: #06587a;
+}
+[data-theme="light"] .auth-sea .auth-mark .lev-mark {
+  filter: drop-shadow(0 2px 5px rgba(6, 70, 100, 0.35));
+}
