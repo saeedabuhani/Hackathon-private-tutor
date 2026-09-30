@@ -21,7 +21,7 @@ module.exports = {
         // Whole slate scale (the app's surfaces, borders and text) flips with the theme
         slate: scale("slate", [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]),
         // Tinted chips / banners / status text: only the shades the app uses
-        indigo: scale("indigo", [200, 300, 400, 800, 900, 950]),
+        indigo: scale("indigo", [200, 300, 400, 500, 600, 700, 800, 900, 950]),
         amber: scale("amber", [300, 400, 800, 900, 950]),
         emerald: scale("emerald", [400, 800, 900, 950]),
         rose: scale("rose", [300, 800, 900, 950]),

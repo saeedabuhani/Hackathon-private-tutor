@@ -11,6 +11,9 @@ const useStore = create((set) => ({
   theme: 'dark', // 'dark' | 'light' | 'auto'
   siteLanguage: 'en', // 'en' | 'he' | 'ar' — the language of the interface itself
 
+  // The saved career profile (undefined = not loaded yet, null = none saved). See app/(main)/career.
+  careerProfile: undefined,
+
   // User
   user: null,
   xp: 0,
@@ -22,8 +25,9 @@ const useStore = create((set) => ({
   setXP: (xp) => set({ xp }),
   setActiveLanguage: (lang) => set({ activeLanguage: lang }),
   setUser: (user) => set({ user }),
+  setCareerProfile: (careerProfile) => set({ careerProfile }),
   addXP: (points) => set((state) => ({ xp: state.xp + points })),
-  reset: () => set({ activeTopic: null, activeMaterialId: null, user: null, xp: 0 }),
+  reset: () => set({ activeTopic: null, activeMaterialId: null, careerProfile: undefined, user: null, xp: 0 }),
 }));
 
 export default useStore;

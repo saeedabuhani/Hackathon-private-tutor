@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import useStore from "@/store/useStore";
 import TopNav from "@/components/layout/TopNav";
+import SeaBackground from "@/components/aquarium/SeaBackground";
 
 export default function MainLayout({ children }) {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function MainLayout({ children }) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SeaBackground />
       <TopNav />
       <main className="flex-1">{children}</main>
     </div>
