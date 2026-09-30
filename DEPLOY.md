@@ -4,7 +4,7 @@ Run these yourself: they need your Vercel login and push your secret keys.
 
 ## 1. Log in and link
 ```bash
-cd C:\Users\saied\Desktop\private-tutor
+cd Hackathon-private-tutor
 npx vercel login
 npx vercel link
 ```
