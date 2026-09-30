@@ -14,8 +14,8 @@ const notoArabic = Noto_Sans_Arabic({
 });
 
 export const metadata = {
-  title: "Private Tutor + StudyFeed",
-  description: "AI study assistant grounded in your own material",
+  title: "Leviathan",
+  description: "AI study companion that also launches your career — feed it your exams, it feeds you a career.",
 };
 
 // Runs before the page is painted: applies the saved theme and language to <html>
