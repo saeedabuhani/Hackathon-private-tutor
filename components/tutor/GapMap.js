@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import { useTranslation } from "@/lib/translations";
 
 function barColor(score) {
-  if (score >= 70) return "bg-emerald-500";
-  if (score >= 40) return "bg-amber-500";
-  return "bg-rose-500";
+  if (score >= 70) return "bg-gradient-to-r from-emerald-500 to-teal-300 shadow-[0_0_6px_rgba(16,185,129,0.24)]";
+  if (score >= 40) return "bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_6px_rgba(245,158,11,0.22)]";
+  return "bg-gradient-to-r from-rose-500 to-pink-400 shadow-[0_0_6px_rgba(244,63,94,0.22)]";
 }
 
 export default function GapMap({ gaps }) {
@@ -17,7 +17,7 @@ export default function GapMap({ gaps }) {
   }
 
   return (
-    <ul className="space-y-4">
+    <ul className="space-y-4 rounded-3xl border border-slate-800 bg-slate-900 p-5">
       {gaps.map((g) => {
         const score = Math.round(g.score_avg || 0);
         const tested = g.attempts_count > 0;

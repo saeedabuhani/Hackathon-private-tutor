@@ -24,7 +24,7 @@ export default function ActiveRecallHint({ hint, sourceReference, rtl }) {
   return (
     <div
       dir={rtl ? "rtl" : "ltr"}
-      className="rounded-lg border border-amber-800 bg-amber-950/30 p-3 text-sm space-y-1"
+      className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm space-y-1 shadow-[0_0_10px_rgba(245,158,11,0.06)]"
     >
       <p className="text-amber-300 font-semibold">{t.hintTitle}</p>
       <p>{hint}</p>

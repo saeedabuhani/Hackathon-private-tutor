@@ -1,44 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { authFetch } from "@/lib/authFetch";
-import { SESSIONS_CHANGED_EVENT } from "@/lib/chatSessions";
+import { useEffect, useState } from "react";
+import LessonCard from "./LessonCard";
+import ConfirmDialog from "./ConfirmDialog";
+import { notify } from "./toast";
+import { useTutorText } from "./tutorText";
 import { formatRelativeDay } from "@/lib/dates";
 import { useTranslation } from "@/lib/translations";
 
-// Saved conversations, newest first. Click one to reopen it with its full history; the
-// ··· menu deletes it.
-export default function ChatSidebar({ activeSessionId, onSessionSelect, onNewChat }) {
+const ACCENTS = ["purple", "blue", "cyan"];
+
+// Saved conversations, newest first, as floating cards. Click one to reopen it with its full
+// history; the ··· menu deletes it, after a styled confirm dialog (not the browser's own
+// confirm()) and with a toast once it's gone. (The data and the delete call come from
+// useTutorLibrary.)
+export default function ChatSidebar({
+  sessions,
+  loading,
+  error,
+  activeSessionId,
+  onSessionSelect,
+  onNewChat,
+  onDelete,
+}) {
   const { t, locale } = useTranslation();
-  const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { x } = useTutorText();
   const [menuOpen, setMenuOpen] = useState(null); // id of the session whose menu is open
-
-  const fetchSessions = useCallback(async () => {
-    try {
-      const res = await authFetch("/api/sessions");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load conversations");
-      setSessions(data.sessions || []);
-      setError("");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Refetch when the open conversation changes (a new one was just created) and whenever
-  // the chat or a material deletion says the list changed
-  useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions, activeSessionId]);
-
-  useEffect(() => {
-    window.addEventListener(SESSIONS_CHANGED_EVENT, fetchSessions);
-    return () => window.removeEventListener(SESSIONS_CHANGED_EVENT, fetchSessions);
-  }, [fetchSessions]);
+  const [pendingDelete, setPendingDelete] = useState(null); // the session asked about in the confirm dialog
+  const [deleting, setDeleting] = useState(false);
 
   // Click anywhere else closes the open menu
   useEffect(() => {
@@ -48,93 +37,86 @@ export default function ChatSidebar({ activeSessionId, onSessionSelect, onNewCha
     return () => window.removeEventListener("click", close);
   }, [menuOpen]);
 
-  async function handleDelete(sessionId, e) {
+  function requestDelete(session, e) {
     e.stopPropagation();
     setMenuOpen(null);
-    if (!confirm(t.confirmDeleteChat)) return;
+    setPendingDelete(session);
+  }
 
-    try {
-      const res = await authFetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error((await res.json()).error || "Delete failed");
-      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-      if (activeSessionId === sessionId) onNewChat();
-    } catch (err) {
-      setError(err.message);
+  async function confirmDelete() {
+    const session = pendingDelete;
+    if (!session) return;
+    setDeleting(true);
+    const ok = await onDelete(session.id);
+    setDeleting(false);
+    setPendingDelete(null);
+    if (ok) {
+      if (activeSessionId === session.id) onNewChat();
+      notify({ message: t.chatDeletedToast, tone: "danger" });
+    } else {
+      notify({ message: t.deleteFailedToast, tone: "danger" });
     }
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b border-slate-800 px-4 pb-4 pt-2">
-        <h2 className="mb-3 text-lg font-bold">🧠 {t.tutor}</h2>
-        <button
-          onClick={onNewChat}
-          className="w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
-        >
-          {t.newChat}
-        </button>
+    <div>
+      <h2 className="rail-title">{x.railChats}</h2>
+      <div className="rail-list">
+        <LessonCard icon="＋" title={x.newChatCard} subtitle={x.newChatSub} accent="green" onClick={onNewChat} />
+
+        {loading && <p className="rail-note">{t.loadingChats}</p>}
+        {error && <p className="rail-note text-red-400">{error}</p>}
+        {!loading && !error && sessions.length === 0 && <p className="rail-note">{t.noChatsYet}</p>}
+
+        {sessions.map((session, i) => (
+          <LessonCard
+            key={session.id}
+            icon="💬"
+            accent={ACCENTS[i % ACCENTS.length]}
+            title={session.materialTitle || t.studyMaterial}
+            subtitle={session.preview || t.chatFallback}
+            meta={formatRelativeDay(session.updated_at, t, locale)}
+            active={activeSessionId === session.id}
+            onClick={() => onSessionSelect(session)}
+            menu={
+              <>
+                <button
+                  type="button"
+                  aria-label={t.chatOptionsAria}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen(menuOpen === session.id ? null : session.id);
+                  }}
+                  className={`lesson-menu-btn focus:opacity-100 [@media(hover:none)]:opacity-100 ${
+                    menuOpen === session.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                  }`}
+                >
+                  ···
+                </button>
+                {menuOpen === session.id && (
+                  <div className="absolute end-2 top-9 z-50 min-w-[130px] rounded-xl border border-slate-700 bg-[#0a1024] p-1 shadow-lg">
+                    <button
+                      onClick={(e) => requestDelete(session, e)}
+                      className="w-full rounded-lg px-3 py-2 text-start text-[13px] text-red-400 hover:bg-white/5"
+                    >
+                      {t.deleteChat}
+                    </button>
+                  </div>
+                )}
+              </>
+            }
+          />
+        ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto py-2">
-        {loading && <p className="p-5 text-center text-sm text-slate-500">{t.loadingChats}</p>}
-        {error && <p className="px-4 py-2 text-xs text-red-400">{error}</p>}
-        {!loading && !error && sessions.length === 0 && (
-          <p className="p-5 text-center text-sm text-slate-500">{t.noChatsYet}</p>
-        )}
-
-        {sessions.map((session) => {
-          const active = activeSessionId === session.id;
-          return (
-            <div
-              key={session.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => onSessionSelect(session)}
-              onKeyDown={(e) => e.key === "Enter" && onSessionSelect(session)}
-              className={`group relative cursor-pointer border-s-[3px] px-4 py-3 transition-colors ${
-                active
-                  ? "border-indigo-500 bg-slate-900"
-                  : "border-transparent hover:bg-slate-900/60"
-              }`}
-            >
-              <p dir="auto" className="mb-1 truncate pe-8 text-[13px] font-semibold">
-                📄 {session.materialTitle || t.studyMaterial}
-              </p>
-              <p dir="auto" className="mb-1 truncate pe-8 text-xs text-slate-400">
-                {session.preview || t.chatFallback}
-              </p>
-              <p className="text-[11px] text-slate-500">
-                {formatRelativeDay(session.updated_at, t, locale)}
-              </p>
-
-              <button
-                type="button"
-                aria-label={t.chatOptionsAria}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuOpen(menuOpen === session.id ? null : session.id);
-                }}
-                className={`absolute end-2 top-1/2 -translate-y-1/2 rounded-md px-2 py-1 text-lg leading-none text-slate-400 hover:bg-slate-800 hover:text-slate-100 focus:opacity-100 [@media(hover:none)]:opacity-100 ${
-                  menuOpen === session.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                }`}
-              >
-                ···
-              </button>
-
-              {menuOpen === session.id && (
-                <div className="absolute end-2 top-full z-50 mt-1 min-w-[130px] rounded-lg border border-slate-700 bg-slate-800 p-1 shadow-lg">
-                  <button
-                    onClick={(e) => handleDelete(session.id, e)}
-                    className="w-full rounded-md px-3 py-2 text-start text-[13px] text-red-400 hover:bg-slate-700"
-                  >
-                    {t.deleteChat}
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title={t.deleteChatTitle}
+        message={t.confirmDeleteChat}
+        busy={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => !deleting && setPendingDelete(null)}
+      />
     </div>
   );
 }

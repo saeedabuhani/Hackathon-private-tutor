@@ -9,7 +9,7 @@ export default function LanguageBridge({ bridge, rtl }) {
   return (
     <div
       dir={rtl ? "rtl" : "ltr"}
-      className="rounded-lg border border-indigo-800 bg-indigo-950/40 p-3 text-sm space-y-1"
+      className="rounded-2xl border border-violet-400/25 bg-violet-500/10 p-3 text-sm space-y-1 shadow-[0_0_10px_rgba(139,92,246,0.07)]"
     >
       <p className="text-indigo-300 font-semibold">🌉 {t.languageBridge}</p>
       <p>

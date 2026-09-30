@@ -46,10 +46,10 @@ export default function MaterialUpload({ userId, onUploaded }) {
           setDragging(false);
           upload(e.dataTransfer.files?.[0]);
         }}
-        className={`cursor-pointer rounded-xl border-2 border-dashed p-10 text-center transition ${
+        className={`cursor-pointer rounded-3xl border-2 border-dashed bg-slate-900/40 p-10 text-center transition duration-300 ${
           dragging
-            ? "border-indigo-400 bg-indigo-950/40"
-            : "border-slate-700 hover:border-slate-500"
+            ? "border-violet-400/60 bg-violet-500/15 shadow-[0_0_17px_rgba(139,92,246,0.18)]"
+            : "border-violet-400/25 hover:border-violet-400/60 hover:bg-violet-500/10 hover:shadow-[0_0_14px_rgba(139,92,246,0.12)]"
         }`}
       >
         <p className="text-lg">{loading ? t.readingMaterial : t.dragHere}</p>
