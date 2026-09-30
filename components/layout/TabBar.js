@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LayoutGroup, MotionConfig, motion } from "framer-motion";
 import { useTranslation } from "@/lib/translations";
 
 const tabs = [
@@ -9,30 +10,43 @@ const tabs = [
   { href: "/tutor", icon: "🧠", key: "tutor" },
   { href: "/explore", icon: "🎬", key: "explore" },
   { href: "/ai-studies", icon: "🤖", key: "aiStudies" },
+  { href: "/career", icon: "🚀", key: "career" },
 ];
 
+// The active tab is one glass pill that slides between tabs (a shared layout animation), with a
+// soft light under it. Reduced motion: it just appears in place.
 export default function TabBar() {
   const pathname = usePathname();
   const { t } = useTranslation();
 
   return (
-    <nav className="flex flex-wrap gap-2">
-      {tabs.map((tab) => {
-        const active = pathname.startsWith(tab.href);
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-              active
-                ? "bg-indigo-600 text-white"
-                : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-            }`}
-          >
-            {tab.icon} {t[tab.key]}
-          </Link>
-        );
-      })}
-    </nav>
+    <MotionConfig reducedMotion="user">
+      <LayoutGroup id="main-tabs">
+        <nav className="tabbar">
+          {tabs.map((tab) => {
+            const active = pathname.startsWith(tab.href);
+            return (
+              <Link key={tab.href} href={tab.href} className={`tab ${active ? "is-active" : ""}`} aria-current={active ? "page" : undefined}>
+                {active && (
+                  <motion.span
+                    layoutId="tab-pill"
+                    className="tab-pill"
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                  >
+                    <span className="tab-pill-light" />
+                  </motion.span>
+                )}
+                <span className="tab-label">
+                  <span className="tab-icon" aria-hidden="true">
+                    {tab.icon}
+                  </span>
+                  {t[tab.key]}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+      </LayoutGroup>
+    </MotionConfig>
   );
 }
