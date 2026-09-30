@@ -82,6 +82,7 @@ The design already keeps the facts in one place, so this is an extension, not a 
 
 - 🟡 **Automated tests** for the API routes and the main flows (today we test by hand and with
   scripted browser runs).
+- 🟡 **Verify the signed-in user's token on every API route.** Today the Career, saved-chat and delete routes do; the older Tutor, Feed, Explore and XP routes still trust the `userId` sent by the app. This is the most important security item.
 - 🟡 **Rate limits** on the AI routes, so one user cannot use up the OpenAI budget.
 - 🟡 **Accessibility review** (keyboard use, contrast, screen readers) on every page.
 - 🔭 A mobile-friendly install (PWA) and offline reading of saved summaries.
@@ -97,5 +98,6 @@ The design already keeps the facts in one place, so this is an extension, not a 
 - The LinkedIn, Indeed, Glassdoor and Drushim buttons open each site's own search page; we do
   not read or store any job listings.
 - On Vercel, uploads above 4.5 MB fail; the YouTube API has a daily quota.
+- Some older API routes (Tutor chat, Feed, Explore, XP) trust the `userId` the app sends instead of checking the user's token; the Career and saved-chat routes do check it.
 - AI answers can be wrong; the Tutor shows when an answer comes from the student's material
   and when it is general knowledge.

@@ -278,7 +278,7 @@ App
 | Styling | Tailwind CSS, CSS variables for the theme, Framer Motion, a 2D canvas aquarium |
 | State | Zustand (`activeTopic`, `activeLanguage`, `user`, `xp`, `careerProfile`) |
 | Database | Supabase (PostgreSQL + `pgvector`), Row Level Security |
-| Auth | Supabase Auth (email/password); the browser sends its token, every API route checks it |
+| Auth | Supabase Auth (email/password). The Career, saved-chat and delete routes verify the user's token on the server (see section 8) |
 | AI | OpenAI `gpt-4o`, `text-embedding-3-small` |
 | Video | YouTube Data API v3 |
 | File parsing | `pdf-parse` (PDF), `mammoth` (Word), GPT-4o Vision (images/handwriting) |
@@ -379,7 +379,7 @@ has Row Level Security — each user only ever sees their own rows (`explore_vid
 | `/api/career/challenge` | POST | Create a signed coding challenge, or review submitted code and award XP |
 | `/api/career/summary` | GET | PDF of everything practiced in Career Launch |
 
-Every route except the public pages requires the signed-in user's token.
+**Who is calling?** The Career routes, the saved-chat routes and the delete routes verify the signed-in user's Supabase token on the server, so the user cannot be faked. The older Tutor, Feed, Explore and XP routes still identify the user by the `userId` the app sends; moving them to token verification is the first security item in [FUTURE.md](./FUTURE.md).
 
 ## 9. Team & division of work
 
