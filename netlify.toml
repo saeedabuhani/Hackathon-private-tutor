@@ -1,0 +1,3 @@
+# The demo is built with: node scripts/build-demo.mjs, then the demo-dist folder is deployed as static files.
+[build]
+  publish = "demo-dist"

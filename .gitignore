@@ -36,3 +36,9 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# static demo build output
+demo-dist/
+
+# Local Netlify folder
+.netlify
