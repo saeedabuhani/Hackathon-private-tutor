@@ -10,6 +10,20 @@ practice and coding challenges. Everything works in **Hebrew, Arabic and English
 
 > Formerly "Private Tutor + StudyFeed". The StudyFeed tab keeps its name; the project is Leviathan.
 
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-f7df1e)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL%20%2B%20pgvector-3ecf8e)
+![OpenAI](https://img.shields.io/badge/OpenAI-gpt--4o-412991)
+![i18n](https://img.shields.io/badge/languages-Hebrew%20%C2%B7%20Arabic%20%C2%B7%20English-blue)
+
+### [▶ Live Demo](https://leviathan-demo.netlify.app)
+
+The live demo is the real interface running on **sample data**: there is no database or AI behind it, nothing is saved, uploads are disabled and video playback is replaced by a placeholder. It signs you in automatically, so you can open the Tutor, ask a question, try the exam, and walk through Career Launch (job kit, interview practice, coding challenge). See [Static demo build](#static-demo-build).
+
+| | |
+|---|---|
+| ![Tutor answer with Language Bridge](docs/screenshots/demo-tutor-answer.png) | ![Career: interview feedback](docs/screenshots/demo-career-interview.png) |
+
 ![Login — the Leviathan aquarium](docs/screenshots/01-login.png)
 
 ## Contents
@@ -25,6 +39,7 @@ practice and coding challenges. Everything works in **Hebrew, Arabic and English
 9. [Team & division of work](#9-team--division-of-work)
 10. [Roadmap](#10-roadmap)
 11. [Deploy & demo](#11-deploy--demo)
+12. [Tests and security notes](#12-tests-and-security-notes)
 
 ---
 
@@ -287,6 +302,20 @@ App
 | Languages | Hebrew, Arabic, English — `lib/translations.js`, full RTL |
 | Deploy | Vercel |
 
+### Architecture
+
+```mermaid
+flowchart LR
+  UI[Next.js 14 App Router<br/>React, Tailwind, Zustand<br/>Hebrew / Arabic / English, RTL] -->|fetch /api/*| API[Route handlers]
+  UI -->|sign in| AUTH[Supabase Auth]
+  API -->|verify token, RLS| DB[(Supabase PostgreSQL + pgvector)]
+  API -->|chat, embeddings, vision| OAI[OpenAI]
+  API -->|search videos| YT[YouTube Data API]
+  API -->|PDF / Word export| EXP[puppeteer-core, docx]
+```
+
+Uploaded material is split into chunks and embedded (`text-embedding-3-small`); a question retrieves the closest chunks, so answers come from **your** material and say so when it does not cover the question.
+
 ## 6. Project structure
 
 ```
@@ -383,6 +412,8 @@ has Row Level Security — each user only ever sees their own rows (`explore_vid
 
 ## 9. Team & division of work
 
+Built by a three-person hackathon team (names as listed in the project; to be confirmed by the authors):
+
 | Name | Area | Branch |
 |---|---|---|
 | **Saeed** | Base: auth, navigation, shared state and libraries, deployment. The Leviathan design (aquarium, login/register, top bar). **Career Launch** (profile, jobs, interview, code, PDF) | `saeed_abo-hani` |
@@ -401,3 +432,25 @@ The full plan, with status per item, is in **[FUTURE.md](./FUTURE.md)**.
 
 - [DEPLOY.md](./DEPLOY.md) — deploying to Vercel (env variables, Supabase URL, known limits).
 - [DEMO.md](./DEMO.md) — the 5-minute demo script and an end-to-end checklist.
+
+### Static demo build
+
+The public demo is built from the same source with no server and no keys:
+
+```bash
+npm install
+node scripts/build-demo.mjs     # writes the static site to demo-dist/
+```
+
+The script copies the project to a temporary folder, removes `app/api`, switches Next.js to `output: "export"` and builds with `NEXT_PUBLIC_DEMO=true`. In that mode `lib/supabase.js` returns a stub client that is always signed in as a demo user, and `lib/demo/install.js` answers every `/api/*` request in the browser from `lib/demo/fixtures.js` and replaces the YouTube player with a placeholder. No API key is ever part of the demo bundle.
+
+## 12. Tests and security notes
+
+**Tests:** there is no automated test suite yet. Verified by hand: `npm run build` succeeds, and the live demo was clicked through with Playwright (tutor chat with Language Bridge, exam, explore, AI Studies, job kit, interview feedback, code challenge) with no console errors.
+
+**Security notes**
+
+- Secrets live in `.env.local` (git-ignored); `.env.example` holds empty placeholders. The full git history was scanned for API keys, JWTs, service-role keys and private keys: none found.
+- Career, saved-chat and delete routes verify the caller's Supabase token on the server; the service-role client is used server-side only.
+- Row Level Security is enabled on the database tables (see `supabase/schema.sql`).
+- The public demo has no back end and contains no credentials.
